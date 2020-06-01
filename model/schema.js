@@ -14,21 +14,23 @@ const userSchema = new Schema({
     membership_ends: { type: Date, require: true },
     reading_hours: { type: Number, require: true },
   },
-  book_issued: {
-    id: { type: ObjectId, ref: "Books" },
-    title: { type: String },
-    author: { type: String },
-    issue_date: { type: Date },
-    return_date: { type: Date },
-    status: {
-      type: String,
-      enum: ["pending", "active", "rejected"],
-      default: "pending",
+  book_issued: [
+    {
+      id: { type: ObjectId, ref: "Books" },
+      title: { type: String },
+      author: { type: String },
+      issue_date: { type: Date },
+      return_date: { type: Date },
+      status: {
+        type: String,
+        enum: ["pending", "active", "rejected", "return"],
+        default: "pending",
+      },
     },
-  },
+  ],
 
   created_at: { type: Date, default: Date.now },
-  updated_at: { type: Date, default: Date.now },
+  updated_at: { type: Date },
 });
 
 const bookSchema = new Schema({
@@ -38,6 +40,11 @@ const bookSchema = new Schema({
   issued_to: { type: ObjectId, ref: "User" },
   issue_date: { type: Date },
   return_date: { type: Date },
+  status: {
+    type: String,
+    enum: ["available", "not available"],
+    default: "available",
+  },
   created_at: { type: Date, default: Date.Now },
   updated_at: { type: Date },
 });
