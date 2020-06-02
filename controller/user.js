@@ -1,6 +1,8 @@
 const bcrypt = require("bcrypt");
 const User = require("../model/schema").user;
 const Book = require("../model/schema").book;
+const passport = require("passport");
+const jwt = require("jsonwebtoken");
 const saltRound = 10;
 
 module.exports = {
@@ -36,6 +38,62 @@ module.exports = {
       }
       return res.json(data);
     });
+  },
+
+  login(req, res, next) {
+    try {
+      if (!req.body.username || !req.body.password) {
+        return res.status(400).json({
+          message: "username or passpword required",
+        });
+      }
+      passport.authenticate("login", (err, user, info) => {
+        if (err) {
+          console.error(`error ${err}`);
+        }
+        if (info !== undefined) {
+          console.error(info.message);
+          if (info.message === "bad username") {
+            res.status(401).send(info.message);
+          } else {
+            res.status(403).send(info.message);
+          }
+        } else {
+          user = user[0];
+          req.logIn(user, () => {
+            const token = jwt.sign(
+              { sub: user._id, username: user.username, role: user.role },
+              "53cr3t-k3y",
+              {
+                expiresIn: 60 * 60 * 24,
+              }
+            );
+            res.status(200).send({
+              auth: true,
+              username: user.userName,
+              token,
+              message: "user found & logged in",
+            });
+          });
+        }
+      })(req, res, next);
+    } catch (err) {
+      console.log(err);
+    }
+  },
+  signOut(req, res) {
+    try {
+      const { user } = req;
+      if (user) {
+        req.logout();
+        res.status(200).send({ msg: "logging out" });
+      } else {
+        console.log(user);
+        res.send({ msg: "no user to log out" });
+      }
+    } catch (e) {
+      throw e;
+    }
   },
 
   getAllUsers(req, res) {

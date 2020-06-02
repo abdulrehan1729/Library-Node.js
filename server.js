@@ -1,6 +1,8 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const router = require("./routers/router");
+const passport = require("passport");
+require("./passport/passport.js");
 
 const app = express();
 const port = process.env.PORT || 8081;
@@ -26,6 +28,11 @@ app.use(
   })
 );
 app.use(bodyParser.json());
+
+//passport
+app.use(passport.initialize());
+
+//Routes
 app.use("/", router);
 
 app.listen(port, console.log(`Server is ruuning on ${port}`));
