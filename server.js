@@ -7,6 +7,9 @@ require("dotenv").config();
 
 const app = express();
 const port = process.env.PORT || 8081;
+const path = require("path");
+
+app.use("*", express.static(path.join(__dirname, "client", "build")));
 
 //mongo connection and config
 const mongoose = require("mongoose");
