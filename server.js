@@ -1,16 +1,26 @@
+require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const router = require("./routers/router");
 const passport = require("passport");
-require("./passport/passport.js");
-require("dotenv").config();
+const path = require("path");
+const cors = require("cors");
 
 const app = express();
 const port = process.env.PORT || 8081;
-const path = require("path");
+require("./passport/passport.js");
+//Static
 
-app.use("*", express.static(path.join(__dirname, "client", "build")));
+app.use(express.static(path.join(__dirname, "client", "build")));
 
+// enables cors
+app.use(
+  cors({
+    origin: "*",
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    preflightContinue: false,
+  })
+);
 //mongo connection and config
 const mongoose = require("mongoose");
 const mongoURI = process.env.MONGODB_URI || "mongodb://localhost/libraryNode";
