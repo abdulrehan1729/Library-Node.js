@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "homepage": "https://me-library.herokuapp.com/",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "server": "nodemon server.js",
@@ -21,7 +22,6 @@
   "bugs": {
     "url": "https://github.com/abdulrehan1729/Library-Node.js/issues"
   },
-  "homepage": "https://github.com/abdulrehan1729/Library-Node.js#readme",
   "dependencies": {
     "bcrypt": "^4.0.1",
     "body-parser": "^1.19.0",
