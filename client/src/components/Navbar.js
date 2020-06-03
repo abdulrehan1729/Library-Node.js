@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Link, Redirect } from "react-router-dom";
 import "../App.css";
 import axios from "axios";
+import jwt_decode from "jwt-decode";
 
 class Navbar extends Component {
   constructor() {
@@ -14,7 +15,6 @@ class Navbar extends Component {
 
   logout(event) {
     event.preventDefault();
-    console.log("logging out");
     axios
       .post("/user/logout", {
         headers: {
@@ -22,7 +22,6 @@ class Navbar extends Component {
         },
       })
       .then((response) => {
-        localStorage.removeItem("jwt");
         if (response.status === 200) {
           this.props.updateUser({
             loggedIn: false,
@@ -37,6 +36,11 @@ class Navbar extends Component {
 
   render() {
     const loggedIn = this.props.loggedIn;
+    let token = localStorage.getItem("jwt");
+    let role = "";
+    if (token) {
+      role = jwt_decode(token).role;
+    }
 
     if (loggedIn) {
       return (
@@ -47,6 +51,18 @@ class Navbar extends Component {
                 <Link to="/books" className="btn btn-link text-secondary">
                   <span className="text-secondary">Books</span>
                 </Link>
+                {role === "admin" ? (
+                  <Link to="/requests" className="btn btn-link text-secondary">
+                    <span className="text-secondary">Requests</span>
+                  </Link>
+                ) : (
+                  <Link
+                    to="/user-history"
+                    className="btn btn-link text-secondary"
+                  >
+                    <span className="text-secondary">History</span>
+                  </Link>
+                )}
                 <Link
                   style={{ float: "right" }}
                   to="#"

@@ -33,7 +33,6 @@ class Login extends Component {
         console.log("login response: ");
         if (response.status === 200) {
           // update App.js state
-          console.log(response);
           localStorage.setItem("jwt", response.data.token);
 
           this.props.updateUser({
@@ -49,7 +48,12 @@ class Login extends Component {
       })
       .catch((error) => {
         console.log("login error: ");
-        console.log(error);
+        console.log(error.response);
+        if (error.response.data.message) {
+          alert(error.response.data.message);
+        } else {
+          alert(error.response.data.error);
+        }
       });
   }
 

@@ -1,6 +1,7 @@
 import React, { forwardRef, Component } from "react";
 import MaterialTable from "material-table";
 import axios from "axios";
+import jwt_decode from "jwt-decode";
 
 import Button from "@material-ui/core/Button";
 
@@ -53,23 +54,112 @@ export default class Books extends Component {
         { title: "Title", field: "title" },
         { title: "Author", field: "author" },
         { title: "Publisher", field: "publisher" },
-        {
-          title: "Status",
-          field: "status",
-          // lookup: { 34: "İstanbul", 63: "Şanlıurfa" },
-        },
+        { title: "Status", field: "status" },
+        { title: "Issue Date", field: "issue_date", type: "date" },
+        { title: "Return Date", field: "return_date", type: "date" },
       ],
-      data: [
-        {
-          title: "Mehmet",
-          author: "Baran",
-          publisher: "1987",
-          status: "63",
-        },
-      ],
+      data: [],
+      editable: "",
+      actions: [],
+      user: "",
     };
   }
   componentDidMount() {
+    let decode = jwt_decode(localStorage.getItem("jwt"));
+    if (decode.role === "admin") {
+      this.setState({
+        user: decode,
+        editable: {
+          onRowAdd: (newData) =>
+            new Promise((resolve, reject) => {
+              resolve();
+              axios
+                .post(
+                  "/book/create",
+                  {
+                    title: newData.title,
+                    author: newData.author,
+                    publisher: newData.publisher,
+                  },
+                  {
+                    headers: {
+                      Authorization: `bearer ${localStorage.getItem("jwt")}`,
+                    },
+                  }
+                )
+                .then((response) => {
+                  this.state.data.push(response.data);
+                  this.componentDidMount();
+                })
+                .catch((e) => {
+                  alert("Internal server error");
+                });
+            }),
+          onRowDelete: (oldData) =>
+            new Promise((resolve, reject) => {
+              resolve();
+              axios
+                .post(
+                  "/book/delete",
+                  { id: oldData._id },
+                  {
+                    headers: {
+                      Authorization: `bearer ${localStorage.getItem("jwt")}`,
+                    },
+                  }
+                )
+                .then((resp) => {
+                  console.log("deleted", resp._id);
+                  this.componentDidMount();
+                })
+                .catch((e) => {
+                  alert("Internal server error");
+                });
+            }),
+        },
+      });
+    } else {
+      this.setState({
+        actions: [
+          {
+            icon: () => (
+              <Button
+                variant="outlined"
+                color="default"
+                className="button"
+                startIcon={<AddBox />}
+              >
+                7
+              </Button>
+            ),
+            tooltip: "issue book for 7 days",
+            onClick: (event, rowData) => {
+              rowData.status = "pending";
+              rowData.allotted_days = 7;
+              this.issueRequestUpdate(rowData);
+            },
+          },
+          {
+            icon: () => (
+              <Button
+                variant="outlined"
+                color="default"
+                className="button"
+                startIcon={<AddBox />}
+              >
+                1
+              </Button>
+            ),
+            tooltip: "issue book for 1 day",
+            onClick: (event, rowData) => {
+              rowData.status = "pending";
+              rowData.allotted_days = 1;
+              this.issueRequestUpdate(rowData);
+            },
+          },
+        ],
+      });
+    }
     axios
       .get("book/all-books", {
         headers: {
@@ -80,7 +170,33 @@ export default class Books extends Component {
         this.setState({ data: response.data });
       });
   }
+  handleChange = (event) => {
+    this.setState({ issueDays: event.target.value });
+  };
 
+  issueRequestUpdate = (rowData) => {
+    let token = localStorage.getItem("jwt");
+    console.log(rowData);
+    axios
+      .post(
+        "/user/request-book-and-update",
+        { user_id: jwt_decode(token).sub, book_details: rowData },
+        {
+          headers: {
+            Authorization: `bearer ${token}`,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(response.data);
+        alert("Request sent");
+        this.componentDidMount();
+      })
+      .catch((e) => {
+        console.log(e);
+        alert(e.response.data);
+      });
+  };
   render() {
     return (
       <div>
@@ -89,54 +205,8 @@ export default class Books extends Component {
           columns={this.state.columns}
           data={this.state.data}
           icons={tableIcons}
-          actions={[
-            {
-              icon: () => (
-                <Button
-                  variant="outlined"
-                  color="default"
-                  className="button"
-                  startIcon={<AddBox />}
-                >
-                  issue
-                </Button>
-              ),
-              tooltip: "",
-              onClick: (event, rowData) => {},
-            },
-          ]}
-          editable={{
-            onRowAdd: (newData) =>
-              new Promise((resolve, reject) => {
-                resolve();
-                axios
-                  .post("/book/create", {
-                    title: newData.title,
-                    author: newData.author,
-                    publisher: newData.publisher,
-                  })
-                  .then((response) => {
-                    this.state.data.push(response.data);
-                    this.componentDidMount();
-                  })
-                  .catch((e) => {
-                    alert("Internal server error");
-                  });
-              }),
-            onRowDelete: (oldData) =>
-              new Promise((resolve, reject) => {
-                resolve();
-                axios
-                  .post("/book/delete", { id: oldData._id })
-                  .then((resp) => {
-                    console.log("deleted", resp._id);
-                    this.componentDidMount();
-                  })
-                  .catch((e) => {
-                    alert("Internal server error");
-                  });
-              }),
-          }}
+          actions={this.state.actions}
+          editable={this.state.editable}
         />
       </div>
     );

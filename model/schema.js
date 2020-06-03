@@ -6,7 +6,6 @@ const userSchema = new Schema({
   first_name: { type: String, required: true },
   last_name: { type: String },
   username: { type: String, required: true, unique: true },
-  email: { type: String, required: true, unique: true },
   phone: { type: Number },
   password: { type: String },
   role: { type: String, enum: ["user", "admin"], default: "user" },
@@ -19,6 +18,7 @@ const userSchema = new Schema({
       id: { type: ObjectId, ref: "Books" },
       title: { type: String },
       author: { type: String },
+      allotted_days: { type: Number },
       issue_date: { type: Date },
       return_date: { type: Date },
       status: {

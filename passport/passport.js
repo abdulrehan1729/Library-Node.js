@@ -21,7 +21,7 @@ passport.use(
             console.log(err);
             return res.json("Ineternal server error");
           }
-          if (user === null) {
+          if (!user.length) {
             return done(null, false, { message: "bad username" });
           }
           bcrypt.compare(password, user[0].password).then((response) => {

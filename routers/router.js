@@ -18,7 +18,11 @@ router.post("/user/logout", userController.signOut);
 
 router.get("/user/all-users", userController.getAllUsers);
 
+router.get("/user/history", userController.userHistory);
+
 router.post("/user/request-book-and-update", userController.updateUserHistory);
+
+router.post("/user/history/delete", userController.deleteUserHistory);
 
 router.post("/user/remove", userController.removeUser);
 
@@ -26,6 +30,8 @@ router.post("/user/remove", userController.removeUser);
 router.post("/book/create", bookController.createBook);
 
 router.get("/book/all-books", bookController.getAllBooks);
+
+router.get("/book/requests", userController.bookRequests);
 
 router.post("/book/return", bookController.updateBookReturn);
 

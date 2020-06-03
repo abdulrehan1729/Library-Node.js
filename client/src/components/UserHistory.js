@@ -3,11 +3,8 @@ import MaterialTable from "material-table";
 import axios from "axios";
 import jwt_decode from "jwt-decode";
 
-import Button from "@material-ui/core/Button";
-
 import AddBox from "@material-ui/icons/AddBox";
 import ArrowDownward from "@material-ui/icons/ArrowDownward";
-import CancelIcon from "@material-ui/icons/Cancel";
 import Check from "@material-ui/icons/Check";
 import ChevronLeft from "@material-ui/icons/ChevronLeft";
 import ChevronRight from "@material-ui/icons/ChevronRight";
@@ -24,7 +21,6 @@ import ViewColumn from "@material-ui/icons/ViewColumn";
 
 const tableIcons = {
   Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
-  Cancel: forwardRef((props, ref) => <CancelIcon {...props} ref={ref} />),
   Check: forwardRef((props, ref) => <Check {...props} ref={ref} />),
   Clear: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
   Delete: forwardRef((props, ref) => <DeleteOutline {...props} ref={ref} />),
@@ -47,7 +43,7 @@ const tableIcons = {
   ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />),
 };
 
-export default class Requests extends Component {
+export default class UserHistory extends Component {
   constructor() {
     super();
     this.state = {
@@ -55,93 +51,73 @@ export default class Requests extends Component {
         { title: "Title", field: "title" },
         { title: "Author", field: "author" },
         { title: "Publisher", field: "publisher" },
-        { title: "Status", field: "status" },
-        { title: "Issue Days", field: "allotted_days" },
+        {
+          title: "Status",
+          field: "status",
+          // lookup: { 34: "İstanbul", 63: "Şanlıurfa" },
+        },
       ],
-      data: [],
+      data: [
+        {
+          title: "Mehmet",
+          author: "Baran",
+          publisher: "1987",
+          status: "63",
+        },
+      ],
+      user: "",
     };
   }
   componentDidMount() {
+    let decoded = jwt_decode(localStorage.getItem("jwt"));
     axios
-      .get("book/requests", {
+      .get("user/history", {
         headers: {
           Authorization: `bearer ${localStorage.getItem("jwt")}`,
         },
+        params: {
+          id: decoded.sub,
+        },
       })
       .then((response) => {
-        this.setState({ data: response.data });
+        this.setState({ data: response.data.book_issued, user: decoded });
       });
   }
-  issueRequestUpdate = (rowData) => {
-    let token = localStorage.getItem("jwt");
-
-    axios
-      .post(
-        "/user/request-book-and-update",
-        { user_id: jwt_decode(token).sub, book_details: rowData },
-        {
-          headers: {
-            Authorization: `bearer ${token}`,
-          },
-        }
-      )
-      .then((response) => {
-        if (response.data.error) {
-          alert(response.data.error);
-        }
-        console.log(response.data);
-        this.componentDidMount();
-      })
-      .catch((e) => {
-        console.log(e);
-        alert(e);
-      });
-  };
 
   render() {
     return (
       <div>
         <MaterialTable
-          title="Issue Requests"
+          title="History"
           columns={this.state.columns}
           data={this.state.data}
           icons={tableIcons}
-          actions={[
-            {
-              icon: () => (
-                <Button
-                  variant="outlined"
-                  color="default"
-                  className="button"
-                  startIcon={<Check />}
-                >
-                  Accept
-                </Button>
-              ),
-              tooltip: "Accept book issue request",
-              onClick: (event, rowData) => {
-                rowData.status = "active";
-                this.issueRequestUpdate(rowData);
-              },
-            },
-            {
-              icon: () => (
-                <Button
-                  variant="outlined"
-                  color="default"
-                  className="button"
-                  startIcon={<CancelIcon />}
-                >
-                  Reject
-                </Button>
-              ),
-              tooltip: "Reject book issue request",
-              onClick: (event, rowData) => {
-                rowData.status = "rejected";
-                this.issueRequestUpdate(rowData);
-              },
-            },
-          ]}
+          editable={{
+            onRowDelete: (oldData) =>
+              new Promise((resolve, reject) => {
+                resolve();
+                axios
+                  .post(
+                    "/user/history/delete",
+                    { user_id: this.state.user.sub, book_data: oldData },
+                    {
+                      headers: {
+                        Authorization: `bearer ${localStorage.getItem("jwt")}`,
+                      },
+                    }
+                  )
+                  .then((resp) => {
+                    if (resp.data.error) {
+                      alert(resp.data.error);
+                    }
+                    console.log("deleted", resp);
+                    this.componentDidMount();
+                  })
+                  .catch((e) => {
+                    alert("Internal server error");
+                  });
+              }),
+          }}
         />
       </div>
     );

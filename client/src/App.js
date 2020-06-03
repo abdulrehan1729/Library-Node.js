@@ -6,6 +6,7 @@ import Books from "./components/Books";
 import Requests from "./components/Requests";
 import Navbar from "./components/Navbar";
 import Login from "./components/Login";
+import UserHistory from "./components/UserHistory";
 class App extends Component {
   constructor() {
     super();
@@ -33,7 +34,13 @@ class App extends Component {
             render={() => <Login updateUser={this.updateUser} />}
           />
           <Route path="/books" render={() => <Books />} />
-          <Route path="/requests" render={() => <Requests />} />
+          {
+            <Route
+              path="/requests"
+              render={() => <Requests loggedIn={this.state.loggedIn} />}
+            />
+          }
+          <Route path="/user-history" render={() => <UserHistory />} />
         </Router>
       </div>
     );

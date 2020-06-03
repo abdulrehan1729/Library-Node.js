@@ -3,9 +3,7 @@ const User = require("../model/schema").user;
 
 module.exports = {
   createBook(req, res) {
-    console.log(req.body);
     const { title, author, publisher } = req.body;
-    console.log(title);
     const book = { title: title, author: author, publisher: publisher };
     Book.create(book, (err, docs) => {
       if (err) {
@@ -15,6 +13,12 @@ module.exports = {
       return res.json(docs);
     });
   },
+  GetFormattedDate(date) {
+    var month = format(date.getMonth() + 1);
+    var day = format(date.getDate());
+    var year = format(date.getFullYear());
+    return day + "/" + month + "/" + year;
+  },
 
   getAllBooks(req, res) {
     let query = Book.find({});
@@ -22,6 +26,7 @@ module.exports = {
       if (err) {
         return res.status(500).json({ error: "internal server error" });
       }
+
       return res.json(docs);
     });
   },
