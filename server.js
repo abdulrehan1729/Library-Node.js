@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const router = require("./routers/router");
 const passport = require("passport");
 require("./passport/passport.js");
+require("dotenv").config();
 
 const app = express();
 const port = process.env.PORT || 8081;

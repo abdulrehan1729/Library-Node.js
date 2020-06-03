@@ -1,11 +1,13 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const ObjectId = Schema.ObjectId;
+const bcrypt = require("bcrypt");
 
 const userSchema = new Schema({
   first_name: { type: String, required: true },
   last_name: { type: String },
   username: { type: String, required: true, unique: true },
+  email: { type: String, required: false },
   phone: { type: Number },
   password: { type: String },
   role: { type: String, enum: ["user", "admin"], default: "user" },
@@ -51,6 +53,9 @@ const bookSchema = new Schema({
 
 userSchema.pre("save", function (next) {
   now = new Date();
+  const salt = bcrypt.genSaltSync(10);
+  const hashedPassword = bcrypt.hashSync(this.password, salt);
+  this.password = hashedPassword;
   this.updated_at = now;
   next();
 });

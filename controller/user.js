@@ -1,9 +1,7 @@
-const bcrypt = require("bcrypt");
 const User = require("../model/schema").user;
 const Book = require("../model/schema").book;
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
-const saltRound = 10;
 
 module.exports = {
   async createUser(req, res) {
@@ -15,6 +13,7 @@ module.exports = {
       phone,
       password,
       membership,
+      role,
     } = req.body;
 
     const user = {
@@ -22,14 +21,13 @@ module.exports = {
       last_name: last_name || null,
       username: username,
       email: email,
-      password: await bcrypt.hash(password, saltRound).then((hash) => {
-        return hash;
-      }),
+      password: password,
       phone: phone || null,
       membership: {
         membership_ends: new Date(membership.membership_ends),
         reading_hours: membership.reading_hours,
       },
+      role: role,
     };
     User.create(user, (err, data) => {
       if (err) {
