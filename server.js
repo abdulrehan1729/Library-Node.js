@@ -10,11 +10,8 @@ const app = express();
 const port = process.env.PORT || 8081;
 require("./passport/passport.js");
 //Static
-const staticPath = path.join(__dirname, "client", "build");
-app.use(express.static(staticPath));
-app.get("*", function (req, res) {
-  res.sendFile("index.html", { staticPath });
-});
+
+app.use(express.static(path.join(__dirname, "client", "build")));
 
 // enables cors
 app.use(
