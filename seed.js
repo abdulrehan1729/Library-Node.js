@@ -1,3 +1,4 @@
+require("dotenv").config();
 const seeder = require("mongoose-seed");
 const db = process.env.MONGODB_URI || "mongodb://localhost/libraryNode";
 const bcrypt = require("bcrypt");

@@ -11,7 +11,7 @@ const port = process.env.PORT || 8081;
 require("./passport/passport.js");
 //Static
 
-app.use(express.static(path.join(__dirname, "client", "build")));
+app.use("/", express.static(path.join(__dirname, "/client/build")));
 
 // enables cors
 app.use(
@@ -28,6 +28,7 @@ const connectOptions = {
   keepAlive: true,
   useNewUrlParser: true,
   useUnifiedTopology: true,
+  useMongoClient: true,
 };
 mongoose.Promise = global.Promise;
 mongoose.connect(mongoURI, connectOptions, (err, db) => {
