@@ -12,7 +12,7 @@ router.post("/user/login", userController.login);
 
 router.post("/user/create", userController.createUser);
 
-router.use(jwtAuth);
+// router.use(jwtAuth);
 
 router.post("/user/logout", userController.signOut);
 
